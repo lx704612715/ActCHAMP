@@ -2,7 +2,7 @@
 
 import rospy
 import rosbag
-import cPickle as pickle
+import pickle
 from changepoint_detection.msg import DataPoint
 
 def main():

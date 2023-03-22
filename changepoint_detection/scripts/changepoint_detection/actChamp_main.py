@@ -14,7 +14,7 @@ from mpl_toolkits.mplot3d import art3d
 from mpl_toolkits.mplot3d import proj3d
 from matplotlib.patches import Circle
 from itertools import product
-import cPickle as pickle
+import pickle
 import copy
 import argparse
 
@@ -93,11 +93,11 @@ def qv_mult(q1, v1):
       
 def makeDetectRequest(req):
     try:
-        dc = rospy.ServiceProxy('changepoint_detection/detect_changepoint_detections', DetectChangepoints)  
+        dc = rospy.ServiceProxy('changepoint_detection/detect_changepoint_detections', DetectChangepoints)
         resp = dc(req)
         return resp
-    except rospy.ServiceException, e:
-        print "Service call failed: %s"%e 
+    except rospy.ServiceException as e:
+        print("Service call failed:", e)
         
         
 if __name__ == '__main__':
@@ -130,13 +130,13 @@ if __name__ == '__main__':
         else:
             data_file = "example_data/stapler"
 
-        f_name = '../../experiments/data/pkl_files/' + data_file + '.pkl'
-        f = open(f_name, 'r')
-        [traj, actions] = pickle.load(f)
-        f.close()
+        f_name = '/home/rbo/champt_ws/src/ActCHAMP/experiments/data/pkl_files/' + data_file + '.pkl'
+        # f = open(f_name, 'r')
+        with open(f_name, "rb") as f:
+            [traj, actions] = pickle.load(f, encoding='latin1')
 
-        t_name = "../../experiments/data/cp_data/"+ data_file + "_action.txt"
-        test_file = open(t_name, 'w')  
+        t_name = "/home/rbo/champt_ws/src/ActCHAMP/experiments/data/cp_data/"+ data_file + "_action.txt"
+        test_file = open(t_name, 'w')
 
         req = DetectChangepointsRequest()
         req.actions_available = True
@@ -144,8 +144,8 @@ if __name__ == '__main__':
         req.actions = [DataPoint(act) for act in actions]
         req.model_type = 'changepoint_detection/ArticulationFitter'
 
-        print "##############################################"
-        print "Testing dataset: " + data_file
+        print("##############################################")
+        print("Testing dataset: " + data_file)
 
         # Microwave
         if i == 1:
@@ -193,17 +193,19 @@ if __name__ == '__main__':
         test_file.write("Run "+ str(1) + " \n==========\n")
 
         for seg in resp.segments:
-            print "Model:", seg.model_name, "   Length:", seg.last_point - seg.first_point + 1
-            print "Start:", seg.first_point
-            print "End:", seg.last_point
+            print("Model:", seg.model_name)
+            print("Length:", seg.last_point - seg.first_point + 1)
+            print("Start:", seg.first_point)
+            print("End:", seg.last_point)
 
             test_file.write("Model: " + str(seg.model_name) + "\n")
             test_file.write("Length: " + str(seg.last_point - seg.first_point + 1) + "\n")
             test_file.write("Start: " + str(seg.first_point) + "\n")
             test_file.write("End: " + str(seg.last_point) + "\n")
             
-            for i in xrange(len(seg.model_params)):
-                print "  ", seg.param_names[i], ":", seg.model_params[i]
+            for i in range(len(seg.model_params)):
+                print("  ", seg.param_names[i])
+                print(":", seg.model_params[i])
                 test_file.write("   "+str(seg.param_names[i])+":"+str(seg.model_params[i])+"\n")
 
                 if seg.param_names[i] == "log_likelihood":
@@ -215,14 +217,14 @@ if __name__ == '__main__':
         test_file.write("\n=========================================\n\n\n")
 
         test_file.close()
-        print "Wrote changpoint data in " + t_name
+        print("Wrote changpoint data in " + t_name)
 
     
         # ########### Drawing code ###########
         if args.draw == 1:
-            X = np.array([traj[i][0] for i in xrange(len(traj))])
-            Y = np.array([traj[i][1] for i in xrange(len(traj))])
-            Z = np.array([traj[i][2] for i in xrange(len(traj))])
+            X = np.array([traj[i][0] for i in range(len(traj))])
+            Y = np.array([traj[i][1] for i in range(len(traj))])
+            Z = np.array([traj[i][2] for i in range(len(traj))])
             
             fig = plt.figure(i)
             ax = fig.gca(projection='3d')
