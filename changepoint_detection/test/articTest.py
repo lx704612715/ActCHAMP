@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import roslib; 
+import roslib
 roslib.load_manifest('changepoint_detection')
 import rospy 
 import numpy as np

@@ -3,21 +3,16 @@
 # import roslib; 
 # roslib.load_manifest('changepoint_detection')
 import rospy 
-import numpy as np
 from pylab import *
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from changepoint_detection.srv import *
 from changepoint_detection.msg import *
 from mpl_toolkits.mplot3d import art3d
-from mpl_toolkits.mplot3d import proj3d
 from matplotlib.patches import Circle
-from itertools import product
 import pickle
-import sys
-import copy
+import os
 import argparse
+from rospkg import RosPack
 
 
 def rotation_matrix(d):
@@ -103,16 +98,18 @@ def makeDetectRequest(req):
 if __name__ == '__main__':
     rospy.init_node('changepoint_detection_test')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=int, help='run specific dataset' , default=7)
-    parser.add_argument('--draw', type=int, help='should plot or not' , default=1)
+    parser.add_argument('--dataset', type=int, help='run specific dataset', default=1)
+    parser.add_argument('--draw', type=int, help='should plot or not', default=1)
     args = parser.parse_args()
+    rospkg_path = RosPack().get_path("changepoint_detection")
+    rospkg_path = os.path.split(rospkg_path)[0]
     
     #Load data - we want the relative difference between 2 object poses
     #m1 and m2 are the trajectories of obj1 and obj2 alone
     #traj1 is obj1-obj2, traj2 is obj2-obj1.  Notice a significant difference. 
 
     if args.dataset == 0:
-        datasets = [1,2,3,4,5]
+        datasets = [1, 2, 3, 4, 5]
     else:
         datasets = [args.dataset]
 
@@ -128,12 +125,12 @@ if __name__ == '__main__':
         else:
             data_file = "example_data/stapler"
 
-        f_name = '/home/rbo/champt_ws/src/ActCHAMP/experiments/data/pkl_files/' + data_file + '.pkl'
-        # f = open(f_name, 'r')
+        f_name = rospkg_path + '/experiments/data/pkl_files/' + data_file + '.pkl'
+
         with open(f_name, "rb") as f:
             [traj, actions] = pickle.load(f, encoding='latin1')
 
-        t_name = "/home/rbo/champt_ws/src/ActCHAMP/experiments/data/cp_data/"+ data_file + "_action.txt"
+        t_name = rospkg_path + "/experiments/data/cp_data/" + data_file + "_action.txt"
         test_file = open(t_name, 'w')
 
         req = DetectChangepointsRequest()
@@ -179,7 +176,6 @@ if __name__ == '__main__':
             req.cp_params.min_seg_len = 10 #3
             req.cp_params.max_particles = 10
             req.cp_params.resamp_particles = 10
-
 
         resp = makeDetectRequest(req)
         

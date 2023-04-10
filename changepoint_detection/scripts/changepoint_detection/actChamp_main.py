@@ -17,6 +17,7 @@ from itertools import product
 import pickle
 import copy
 import argparse
+import os
 
 
 
@@ -101,14 +102,15 @@ def makeDetectRequest(req):
         
         
 if __name__ == '__main__':
+    from rospkg import RosPack
     rospy.init_node('ActCHAMP_detection_test')
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--dataset', type=int, help='run specific dataset' , default=0)
     parser.add_argument('--draw', type=int, help='should plot or not' , default=1)
-
+    rospkg_path = RosPack().get_path("changepoint_detection")
+    rospkg_path = os.path.split(rospkg_path)[0]
     args = parser.parse_args()
-    
     #Load data - we want the relative difference between 2 object poses
     #m1 and m2 are the trajectories of obj1 and obj2 alone
     #traj1 is obj1-obj2, traj2 is obj2-obj1.  Notice a significant difference. 
@@ -130,12 +132,12 @@ if __name__ == '__main__':
         else:
             data_file = "example_data/stapler"
 
-        f_name = '/home/rbo/champt_ws/src/ActCHAMP/experiments/data/pkl_files/' + data_file + '.pkl'
-        # f = open(f_name, 'r')
+        f_name = rospkg_path + '/experiments/data/pkl_files/' + data_file + '.pkl'
+
         with open(f_name, "rb") as f:
             [traj, actions] = pickle.load(f, encoding='latin1')
 
-        t_name = "/home/rbo/champt_ws/src/ActCHAMP/experiments/data/cp_data/"+ data_file + "_action.txt"
+        t_name = rospkg_path + "/experiments/data/cp_data/" + data_file + "_action.txt"
         test_file = open(t_name, 'w')
 
         req = DetectChangepointsRequest()
@@ -180,8 +182,8 @@ if __name__ == '__main__':
         else:
             # Generic
             req.cp_params.len_mean = 50.0
-            req.cp_params.len_sigma = 10. #5.0
-            req.cp_params.min_seg_len = 10 #3
+            req.cp_params.len_sigma = 10.  #5.0
+            req.cp_params.min_seg_len = 10  #3
             req.cp_params.max_particles = 10
             req.cp_params.resamp_particles = 10
 
@@ -228,7 +230,7 @@ if __name__ == '__main__':
             
             fig = plt.figure(i)
             ax = fig.gca(projection='3d')
-            ax.set_aspect('equal')
+            # ax.set_aspect('equal')
                 
             colors = []
             choices = ['red','green','blue','purple','yellow','black']
